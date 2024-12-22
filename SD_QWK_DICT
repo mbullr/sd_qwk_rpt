@@ -1,0 +1,84 @@
+PROGRAM SD_QWK_DICT
+**************************************************************************
+* Copyright (c)2024 The SD Developers, All Rights Reserved
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 3, or (at your option)
+* any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software Foundation,
+* Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*
+*
+**************************************************************************
+*
+* MODULE: SD_QWK_DICT
+* AUTHOR: MAB
+* VERSION: 1.0.0
+* CREATED: 12/xx/2024
+* UPDATED:
+*
+* MAINTENANCE RECORD:
+*
+* EQUATE:
+*
+* PROGRAM CREATES A FILE WHICH WILL CONTAIN THE DICTIONARY NAMES AND DESCRIPTION OF THE REQUESTED FILE
+* COMMAND LINE: SD_QWK_DICT SD_FILE_NAME OS_FILE_PATH OS_FILE_NAME
+* SD_FILE_NAME - NAME OF SD FILE TO LIST DICTIONARY ITEMS FOR 
+* OS_FILE_PATH AND NAME - OS PATH AND NAME WHERE TO WRITE THE LIST
+*
+
+ARGS = TRIM(SENTENCE())
+* LOGMSG ARGS
+
+ARG_CNT = DCOUNT(ARGS,' ')
+IF ARG_CNT = 4 THEN
+  SD_FILE_NAME = FIELD(ARGS,' ',2)
+  OS_FILE_PATH = FIELD(ARGS,' ',3)
+  OS_FILE_NAME = FIELD(ARGS,' ',4)
+  
+  OPEN 'DICT', SD_FILE_NAME TO DICT_FILE THEN
+    TEMP_FILE = OS_FILE_PATH:@DS:OS_FILE_NAME
+    OPENSEQ TEMP_FILE TO TF_VAR ELSE
+       IF STATUS() THEN 
+           LOGMSG ARGS : 'COULD NOT OPEN TEMP FILE: ':STATUS()
+           GOTO 9999
+       END
+       CREATE TF_VAR ELSE
+           LOGMSG ARGS : 'COULD NOT CREATE TEMP FILE: ':STATUS()
+           GOTO 9999
+       END
+       SSELECT DICT_FILE TO 5
+       LOOP
+         READNEXT ID FROM 5 ELSE EXIT
+         READ DICT_REC FROM DICT_FILE, ID THEN
+           IF DICT_REC<1> = 'D' OR DICT_REC<1> = "I" THEN
+             WRITECSV ID, DICT_REC<4>  TO TF_VAR ELSE
+                LOGMSG ARGS : 'COULD NOT WRITE TO: 'TEMP_FILE 
+                EXIT
+             END
+           END
+         END
+       REPEAT
+       CLOSESEQ TF_VAR
+       CLOSE DICT_FILE
+
+    END
+
+  END ELSE
+    LOGMSG ARGS :' ': SD_FILE_NAME : ' NOT FOUND'
+  END
+END ELSE
+   LOGMSG ARGS :' ': SD_FILE_NAME : ' INVALID ARG COUNT' 
+END
+*
+9999 *
+CHAIN 'OFF'
+END

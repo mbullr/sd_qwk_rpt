@@ -1,0 +1,80 @@
+PROGRAM SD_QWK_RUN
+**************************************************************************
+* Copyright (c)2024 The SD Developers, All Rights Reserved
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 3, or (at your option)
+* any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software Foundation,
+* Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*
+*
+**************************************************************************
+*
+* MODULE: SD_QWK_RUN
+* AUTHOR: MAB
+* VERSION: 1.0.0
+* CREATED: 09/xx/2024
+* UPDATED:
+*
+* MAINTENANCE RECORD:
+*
+* EQUATE:
+*
+* PROGRAM CALLS FOR THE CREATION OF AN SD QUICK REPORT VIA A CALL TO SD_QWK_RPT
+* COMMAND LINE: SD_QWK_RUN SD_QWK_RPT_FLDR SD_QWK_RPT_ID WRT_FLDR_PATH WRT_RPT_FNAME OPTS
+* SD_QWK_RPT_FLDR FULLY QUALIFIED PATH SD_QWK_RPT REPORT DEFINITION FILE
+* SD_QWK_RPT_ID   SD_QWK_RPT REPORT DEFINITION FILE NAME (RECORD) 
+* WRT_FLDR_PATH   PATH TO FOLDER TO WRITE REPORT TO (MUST HAVE PERMISSION TO WRITE)
+* WRT_RPT_FNAME   FILE NAME FOR REPORT
+* OPTS            OPTIONS (FOR NOW 'XLSX')
+*
+* SD_QWK_RUN C:\Users\mabul\projects\sd_qwk_rpt qwk_tst1 C:\QMACCOUNTS\Reports cm_report.xlsx xlsx off
+
+
+ARGS = TRIM(SENTENCE())
+LOGMSG ARGS
+
+ARG_CNT = DCOUNT(ARGS,' ')
+IF ARG_CNT = 7 THEN
+    OFF_SWTCH = FIELD(ARGS,' ',7)
+END ELSE
+    OFF_SWTCH = ''
+END
+
+IF ARG_CNT = 6 OR ARG_CNT = 7 THEN
+  SD_QWK_RPT_FLDR = FIELD(ARGS,' ',2)
+  SD_QWK_RPT_ID = FIELD(ARGS,' ',3)  
+  WRT_FLDR_PATH = FIELD(ARGS,' ',4)
+  WRT_RPT_FNAME = FIELD(ARGS,' ',5)
+  REPLACE_STRING = ''
+  OPTS = FIELD(ARGS,' ',6)
+
+  OPENPATH SD_QWK_RPT_FLDR TO DEF_FILE_VAR THEN
+    READ DEF_REC FROM DEF_FILE_VAR, SD_QWK_RPT_ID THEN
+      CALL SD_QWK_RPT(DEF_REC, WRT_FLDR_PATH, WRT_RPT_FNAME, REPLACE_STRING, OPTS, MY_STATUS)
+    END ELSE
+      LOGMSG ARGS :' CANNOT READ: ':SD_QWK_RPT_ID
+    END 
+  END ELSE
+    CALL !ERRTEXT(TEXT, STATUS()) 
+    LOGMSG 'SD_QWK_RUN - CANNOT OPEN: ':SD_QWK_RPT_FLDR
+	LOGMSG 'SD_QWK_RUN - CANNOT OPEN: ':TEXT
+  END
+  
+END ELSE
+   LOGMSG 'SD_QWK_RUN - INVALID ARG COUNT' 
+END
+
+IF OCONV(OFF_SWTCH,'MCL') = 'off' THEN
+    CHAIN 'OFF'
+END
+END
