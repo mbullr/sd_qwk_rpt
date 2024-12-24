@@ -190,7 +190,7 @@ def query(edef_line,qfilename,dict_list):
 
 def data_line():
     data_layout = [
-        [sg.Text('Static Data / Text',size = (10,1)), sg.Input(size = (15,1), key = '-DATA_PARAM-')],
+        [sg.Text('Static Text',size = (15,1)), sg.Input(size = (15,1), key = '-DATA_PARAM-')],
 
         [sg.Button('Save')]
  
