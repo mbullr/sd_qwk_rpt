@@ -51,6 +51,7 @@ import os
 import json
 import subprocess
 import uuid
+import copy
 
 import sd_qwk_rpt_layouts as gl
 import sd_qwk_rpt_constants as gc
@@ -63,7 +64,7 @@ SDME_VM  = chr(253)
 SDME_SVM = chr(252)
 
 # def for SD vs QM vs SCARLETDME
-SD_FILE_BOLB = '~0'
+SD_FILE_BOLB = '%0'
 SD_EXE = '/usr/local/sdsys/bin/sd'
 
 ## global var (i know, i shouldn't)
@@ -392,16 +393,15 @@ def auto_create_query_cols(edef_line,rpt_cols):
         if cellvalues[row_idx][col_tst] != gc.EMPTYCELL:
             sg.popup('Query', 'Report Column: '+ str(col_tst) + ' Not Empty, Cannot Auto Create')
             return
+    # how many query's are defined in this report
+    # should make column ids unique
+    q_cnt = 1
+    for def_item in defdict:
+        if defdict[def_item][gc.DF_DATA_TYPE] == 'Q':
+            q_cnt +=1    
     # looks good, create the columns
     for i in range(1, cols_to_create):
         new_col_idx =  col_idx + i
-        # how many query's are defined in this report
-        # should make column ids unique
-        q_cnt = 1
-        for def_item in defdict:
-          if def_item[gc.DF_DATA_TYPE] == 'Q':
-              q_cnt +=1
-
         new_col_id =  'Q' + str(q_cnt) + '_' + str(rpt_cols[i])  
 
         if new_col_id in defdict:
@@ -409,7 +409,7 @@ def auto_create_query_cols(edef_line,rpt_cols):
             return    
         
         cellvalues[row_idx][new_col_idx] = new_col_id
-        new_def = edef_line.copy()
+        new_def = copy.deepcopy(edef_line)
         new_def[gc.DF_ITEM_NAME] = new_col_id
         new_def[gc.DF_CELL_REF] = [new_col_idx,row_idx]
         new_def[gc.DF_DATA_TYPE] = 'QC'
@@ -438,15 +438,17 @@ def auto_create_query_hdrs(edef_line,rpt_cols,hdr_dict):
         if cellvalues[row_idx][col_tst] != gc.EMPTYCELL:
             sg.popup('Query', 'Heading Column: '+ str(col_tst) + ' Not Empty, Cannot Auto Create')
             return
+    
+    # how many query's are defined in this report
+    # should make column ids unique
+    q_cnt = 1
+    for def_item in defdict:
+        if defdict[def_item][gc.DF_DATA_TYPE] == 'Q':
+            q_cnt +=1
+
     # looks good, create the columns
     for i in range(0, cols_to_create):
         new_col_idx =  col_idx + i
-        # how many query's are defined in this report
-        # should make column ids unique
-        q_cnt = 1
-        for def_item in defdict:
-          if def_item[gc.DF_DATA_TYPE] == 'Q':
-              q_cnt +=1
         
         new_col_header = str(hdr_dict[rpt_cols[i]])
         new_col_id =  'Q' + str(q_cnt) + '_' + new_col_header[:15]  
@@ -456,7 +458,7 @@ def auto_create_query_hdrs(edef_line,rpt_cols,hdr_dict):
             return    
         
         cellvalues[row_idx][new_col_idx] = new_col_id
-        new_def = edef_line.copy()
+        new_def = copy.deepcopy(edef_line)
         new_def[gc.DF_ITEM_NAME] = new_col_id
         new_def[gc.DF_CELL_REF] = [new_col_idx,row_idx]
         new_def[gc.DF_DATA_TYPE] = 'T'
@@ -844,10 +846,9 @@ def getcell(row,col,cellvalues,defdict):
     def_key = cellvalues[row][col]
     if def_key == gc.EMPTYCELL:
         # note to prevent index error, fill out definition line structure
-        edef_line = gc.DF_STRUCTURE.copy() 
+        edef_line =  copy.deepcopy(gc.DF_STRUCTURE) 
     else:
         edef_line = defdict[def_key]
-
     rtn_action = editor_dialog(col,row,edef_line)
     # propcess returned action
 

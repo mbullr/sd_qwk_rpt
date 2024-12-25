@@ -37,7 +37,7 @@ PROGRAM SD_QWK_RUN
 * WRT_RPT_FNAME   FILE NAME FOR REPORT
 * OPTS            OPTIONS (FOR NOW 'XLSX')
 *
-* SD_QWK_RUN C:\Users\mabul\projects\sd_qwk_rpt qwk_tst1 C:\QMACCOUNTS\Reports cm_report.xlsx xlsx off
+* SD_QWK_RUN /home/sd/user_accounts/mabull/REPORTS_DEF test1 /home/sd/user_accounts/mabull/REPORTS cm_report.xlsx xlsx {off}
 
 
 ARGS = TRIM(SENTENCE())
