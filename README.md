@@ -1,0 +1,2 @@
+SD Quick Report is a simple spreadsheet based report design and creation package. The original intent was to test SD's embedded python.
+The package was modified to also work without embedded python (should work with QM, ScarletDME and SD without embedded python). 
