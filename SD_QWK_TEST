@@ -30,7 +30,10 @@ PROGRAM SD_QWK_TEST
 * EQUATE:
 *
 * PROGRAM TO TEST SD_QWK_RPT
-* create a report def
+*  - creates dummy db file CUSTOMERS
+*  - CUSTOMERS populated with data found in BP/cm_csv
+*  - creates report definition record
+*  - run sd_qwk_rpt attempting to write created report to /home/<username>/Documents/cm_report.xlsx
 *
 $DEFINE DF_ITEM_NAME  1
 $DEFINE DF_CELL_REF   2
@@ -258,20 +261,20 @@ def_rec<IX,DF_FONT_STYLE,DF_FONT_ITLC> = "True"
 def_rec<IX,DF_FONT_STYLE,DF_FONT_COLOR > = "0000FF00" ;* green
 SKIPRPT2:
 
-DEF_FILE = "SD_REPORTS"
+DEF_FILE = "REPORTS_DEF"
 DEF_FILE_ID = "CM_RPT"
-REPORT_FILE_PATH = "/var/samba/reports"
+REPORT_FILE_PATH = "/home/" : @LOGNAME : "/Documents"
 REPORT_FILE_NAME = "cm_report.xlsx"
 REPLACE_STRING = ""
 OPTIONS = 'xlsx'
 MY_STATUS = 0
 
-OPEN DEF_FILE TO DF_FILE_VAR THEN
-  WRITE def_rec on DF_FILE_VAR, DEF_FILE_ID 
-END ELSE
-  CRT 'CANNOT OPEN: ':DEF_FILE
-  STOP
-END
+*OPEN DEF_FILE TO DF_FILE_VAR THEN
+*  WRITE def_rec on DF_FILE_VAR, DEF_FILE_ID 
+*END ELSE
+*  CRT 'CANNOT OPEN: ':DEF_FILE
+*  STOP
+*END
 *
 
 CALL SD_QWK_RPT(def_rec, REPORT_FILE_PATH, REPORT_FILE_NAME, REPLACE_STRING, OPTIONS, MY_STATUS)
