@@ -1,6 +1,6 @@
    SUBROUTINE SD_QWK_RPT(RPT_DEF_REC, REPORT_FILE_PATH, REPORT_FILE_NAME, REPLACE_STRING, OPTIONS, MY_STATUS)
 **************************************************************************
-* Copyright (c)2024 The SD Developers, All Rights Reserved
+* Copyright (c)2025 The SD Developers, All Rights Reserved
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,12 @@
 *
 * MODULE: SD_QWK_RPT
 * AUTHOR: MAB
-* VERSION: 1.0.0
+* VERSION: 1.0.1
 * CREATED: 12/xx/2024
 * UPDATED:
 *
 * MAINTENANCE RECORD:
+* Apr 25 mab update to new python function call format
 *
 * EQUATE:
 *
@@ -61,6 +62,8 @@
 *******************************************************************************************************************************************
 * Set compiler options and add INCLUDES
 *******************************************************************************************************************************************
+$include SDPYFUNC.H
+*
 * IS_SD - running SD not QM/ScarletDME
 * WRT_SCRPT - write a copy of the script file to disk, useful for debugging, a must for non embedded python implementation 
 * EDB - extra debug info written to errlog
@@ -257,21 +260,13 @@
 * CREATE OUR WORKBOOK (wb)
 *   AND THE WORKSHEET (ws)
    $ifdef IS_SD
-   CALL !PY_INITIALIZE(RTN)
+   RTN = PY_INITIALIZE()
    IF RTN <> 0 THEN
     MY_STATUS = 1
     LOGMSG "SD_QWK_RPT: PY_INITIALIZE ERROR: ":RTN:",  Abort Report"
     GOTO MAIN.999  ;* EXIT ON ERROR
    END
 *
-* INIT PYTHON
-*
-   CALL !PY_INITIALIZE(RTN)
-   IF RTN <> 0 THEN
-    MY_STATUS = 1
-    LOGMSG "SD_QWK_RPT: PY_INITIALIZE ERROR: ":RTN:",  Abort Report"
-    GOTO MAIN.999  ;* EXIT ON ERROR
-   END
    $endif
 *
 * LOAD IN THE MODULES WE WILL NEED
@@ -293,7 +288,7 @@
    GOSUB WRT_SCRIPT
    $ENDIF
    $ifdef IS_SD
-   CALL !PY_RUNSTRING(SCRIPT,RTN)
+   RTN = PY_RUNSTRING(SCRIPT)
    IF RTN <> 0 THEN
     MY_STATUS = 1
     LOGMSG "SD_QWK_RPT: PY_RUNSTRING ERROR: ":RTN:",  Abort Report"
@@ -319,7 +314,7 @@
    $ENDIF
 
    $ifdef IS_SD
-   CALL !PY_RUNSTRING(SCRIPT,RTN)
+   RTN = PY_RUNSTRING(SCRIPT)
    IF RTN <> 0 THEN
     MY_STATUS = 1
     LOGMSG "SD_QWK_RPT: PY_RUNSTRING ERROR: ":RTN:",  Abort Report"
@@ -414,7 +409,7 @@ PARSE_DEF_FILE: *
       GOSUB WRT_SCRIPT
       $ENDIF
       $ifdef IS_SD
-      CALL !PY_RUNSTRING(SCRIPT,RTN)
+      RTN = PY_RUNSTRING(SCRIPT)
       IF RTN <> 0 THEN
        MY_STATUS = 1
        LOGMSG "SD_QWK_RPT: PY_RUNSTRING ERROR: ":RTN:",  Abort Report"
@@ -604,7 +599,7 @@ PROCESS_SDQUERY: *
    $ENDIF
 
    $IFDEF IS_SD
-   CALL !PY_RUNSTRING(SCRIPT,RTN)
+   RTN = PY_RUNSTRING(SCRIPT)
 
    IF RTN <> 0 THEN
     MY_STATUS = 1
@@ -1282,7 +1277,7 @@ LOCAL SUBROUTINE WRITECELL(L_ROW,CELL_DATA,DEF_LN_DATA,FMT_REC,PY_STATUS)
     END
 *
     $ifdef IS_SD
-    CALL !PY_RUNSTRING(SCRIPT,RTN)
+    RTN = PY_RUNSTRING(SCRIPT)
     IF RTN <> 0 THEN
       LOGMSG "SD_QWK_RPT: script failed: ":SCRIPT
       MY_STATUS = 1
